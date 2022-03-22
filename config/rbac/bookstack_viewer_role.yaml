@@ -1,0 +1,20 @@
+# permissions for end users to view bookstacks.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: bookstack-viewer-role
+rules:
+- apiGroups:
+  - tools.opdev.io
+  resources:
+  - bookstacks
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - tools.opdev.io
+  resources:
+  - bookstacks/status
+  verbs:
+  - get

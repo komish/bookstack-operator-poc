@@ -1,0 +1,24 @@
+# permissions for end users to edit bookstacks.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: bookstack-editor-role
+rules:
+- apiGroups:
+  - tools.opdev.io
+  resources:
+  - bookstacks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - tools.opdev.io
+  resources:
+  - bookstacks/status
+  verbs:
+  - get

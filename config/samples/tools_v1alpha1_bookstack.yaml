@@ -1,0 +1,6 @@
+apiVersion: tools.opdev.io/v1alpha1
+kind: BookStack
+metadata:
+  name: bookstack-sample
+spec:
+  # TODO(user): Add fields here
