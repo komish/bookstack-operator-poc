@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -48,6 +49,17 @@ type BookStack struct {
 
 	Spec   BookStackSpec   `json:"spec,omitempty"`
 	Status BookStackStatus `json:"status,omitempty"`
+}
+
+func (b *BookStack) NamespacedName() string {
+	return client.ObjectKeyFromObject(b).String()
+}
+
+func (b *BookStack) GetServiceName() string {
+	// TODO(): This will run into issues
+	// if the instance's name hits max character
+	// limits.
+	return b.Name + "-svc"
 }
 
 //+kubebuilder:object:root=true
