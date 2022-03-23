@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: bookstack
+  name: bookstack-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookstack
+  template:
+    metadata:
+      labels:
+        app: bookstack
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: bookstack-config
+        - secretRef:
+            name: bookstack-secrets
+        image: lscr.io/linuxserver/bookstack:latest
+        name: bookstack
+        ports:
+        - containerPort: 80
+          hostPort: 6875
+          name: http
+        volumeMounts:
+        - mountPath: /config
+          name: bookstack-config-vol
+      - envFrom:
+        - configMapRef:
+            name: bookstack-db-config
+        - secretRef:
+            name: bookstack-db-secrets
+        image: lscr.io/linuxserver/mariadb:latest
+        name: bookstack-db
+        volumeMounts:
+        - mountPath: /configs
+          name: bookstack-db-config-vol
+      volumes:
+      - name: bookstack-config-vol
+        persistentVolumeClaim:
+          claimName: app-volume-claim
+      - name: bookstack-db-config-vol
+        persistentVolumeClaim:
+          claimName: db-volume-claim

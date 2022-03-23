@@ -30,8 +30,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// BookStackServiceReconciler reconciles the Service resource.
-type BookStackServiceReconciler struct {
+// BookStackServiceAccountReconciler reconciles the service account resource.
+type BookStackServiceAccountReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 }
@@ -39,15 +39,15 @@ type BookStackServiceReconciler struct {
 //+kubebuilder:rbac:groups=tools.opdev.io,resources=bookstacks,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=tools.opdev.io,resources=bookstacks/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=tools.opdev.io,resources=bookstacks/finalizers,verbs=update
-//+kubebuilder:rbac:groups=core,resources=services,verbs=get;update;patch
-//+kubebuilder:rbac:groups=core,resources=services/finalizers,verbs=update
+//+kubebuilder:rbac:groups=core,resources=serviceaccounts,verbs=get;update;patch
+//+kubebuilder:rbac:groups=core,resources=serviceaccounts/finalizers,verbs=update
 
 // Reconcile will ensure that the Kubernetes Service for BookStack
 // reaches the desired state.
-func (r *BookStackServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *BookStackServiceAccountReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx)
-	l.Info("service reconciliation initiated.")
-	defer l.Info("service reconciliation complete.")
+	l.Info("service account reconciliation initiated.")
+	defer l.Info("service account reconciliation complete.")
 	bookstackInstanceKey := req.NamespacedName
 
 	// Get the BookStack instance to make sure it still exists.
@@ -62,21 +62,22 @@ func (r *BookStackServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return subrec.Evaluate(subrec.RequeueWithError(err))
 	}
 
-	newBookstackSvc := instance.NewService()
+	new := instance.NewServiceAccount()
 
-	err = ctrl.SetControllerReference(&instance, &newBookstackSvc, r.Scheme)
+	err = ctrl.SetControllerReference(&instance, &new, r.Scheme)
 	if err != nil {
 		return subrec.Evaluate(subrec.RequeueWithError(err))
 	}
 
-	// If service exists, get it and patch it
-	var existingSvc corev1.Service
-	err = r.Client.Get(ctx, client.ObjectKeyFromObject(&newBookstackSvc), &existingSvc)
+	// If service account exists, get it and patch it
+	var existing corev1.ServiceAccount
+	err = r.Client.Get(ctx, client.ObjectKeyFromObject(&new), &existing)
 
 	if apierrors.IsNotFound(err) {
-		// Create resource
-		l.Info("creating resource", newBookstackSvc.Kind, newBookstackSvc.Name)
-		if err := r.Client.Create(ctx, &newBookstackSvc); err != nil {
+		// create the resource because it does not exist.
+		l.Info("creating resource", new.Kind, new.Name)
+
+		if err := r.Client.Create(ctx, &new); err != nil {
 			return subrec.Evaluate(subrec.RequeueWithError(err))
 		}
 	}
@@ -86,12 +87,12 @@ func (r *BookStackServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 
 	l.Info("updating service if necessary")
-	patchDiff := client.MergeFrom(&existingSvc)
-	if err = mergo.Merge(&existingSvc, newBookstackSvc, mergo.WithOverride); err != nil {
+	patchDiff := client.MergeFrom(&existing)
+	if err = mergo.Merge(&existing, new, mergo.WithOverride); err != nil {
 		return subrec.Evaluate(subrec.RequeueWithError(err))
 	}
 
-	if err = r.Patch(ctx, &existingSvc, patchDiff); err != nil {
+	if err = r.Patch(ctx, &existing, patchDiff); err != nil {
 		return subrec.Evaluate(subrec.RequeueWithError(err))
 	}
 
@@ -99,9 +100,9 @@ func (r *BookStackServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *BookStackServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *BookStackServiceAccountReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&toolsv1alpha1.BookStack{}).
-		Owns(&corev1.Service{}).
+		Owns(&corev1.ServiceAccount{}).
 		Complete(r)
 }

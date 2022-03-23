@@ -78,14 +78,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.BookStackReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "BookStack")
-		os.Exit(1)
-	}
-
 	if err = (&controllers.BookStackServiceReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -93,6 +85,55 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "BookStackService")
 		os.Exit(1)
 	}
+
+	if err = (&controllers.BookStackServiceAccountReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "BookStackServiceAccount")
+		os.Exit(1)
+	}
+
+	if err = (&controllers.BookStackConfigMapReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "BookStackConfigMap")
+		os.Exit(1)
+	}
+
+	if err = (&controllers.BookStackSecretReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "BookStackSecret")
+		os.Exit(1)
+	}
+
+	if err = (&controllers.BookStackAppStorageReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "BookStackAppStorage")
+		os.Exit(1)
+	}
+
+	if err = (&controllers.BookStackDBStorageReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "BookStackDBStorage")
+		os.Exit(1)
+	}
+
+	if err = (&controllers.BookStackDeploymentReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "BookStackDeployment")
+		os.Exit(1)
+	}
+
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

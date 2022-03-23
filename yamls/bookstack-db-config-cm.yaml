@@ -1,0 +1,11 @@
+apiVersion: v1
+data:
+  APP_URL: http://localhost:6875/
+  MYSQL_DATABASE: bookstackapp
+  MYSQL_USER: bookstack
+  PGID: "1000"
+  PUID: "1000"
+  TZ: America/Chicago
+kind: ConfigMap
+metadata:
+  name: bookstack-db-config
